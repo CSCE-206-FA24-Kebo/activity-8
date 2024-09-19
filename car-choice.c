@@ -2,24 +2,21 @@
 #include <string.h>
 
 // Struct definitions
-struct Date
-{
+struct Date {
     int day;
     int month;
     int year;
 };
 
-struct Engine
-{
+struct Engine {
     float displacement;
     int cylinders;
-    char *fuel_type;
+    char fuel_type[20];
 };
 
-struct Car
-{
-    char *name;
-    char *color;
+struct Car {
+    char name[50];
+    char color[20];
     float price;
     int mileage;
     float mpg;
@@ -33,96 +30,85 @@ int set_manufacture_date(struct Car *c, int day, int month, int year);
 int set_engine(struct Car *c, float displacement, int cylinders, char *fuel_type);
 void print_car(struct Car *c);
 void inspect_car(struct Car *c);
+void calculate_total_value(struct Car *c, int num_years);
+void calculate_annual_fuel_cost(struct Car *c, int num_years, int annual_mileage, float initial_fuel_price, float annual_price_increase);
 
 // DO NOT MODIFY THE MAIN() FUNCTION
-int main()
-{
-    struct Car toyota_corolla = {.name = "Toyota Corolla", .color = "Silver", .mileage = 5000, .mpg = 32};
-    struct Car tesla_model_3 = {.name = "Tesla Model 3", .color = "Red", .mileage = 10000, .mpg = 134};
-    struct Car ford_f150 = {.name = "Ford F-150", .color = "Blue", .mileage = 15000, .mpg = 20};
-    struct Car honda_civic = {.name = "Honda Civic", .color = "White", .mileage = 8000, .mpg = 33};
-    struct Car chevrolet_bolt = {.name = "Chevrolet Bolt", .color = "Green", .mileage = 12000, .mpg = 118};
-    struct Car bmw_x5 = {.name = "BMW X5", .color = "Black", .mileage = 20000, .mpg = 25};
+int main() {
+    struct Car my_car;
+    
+    strcpy(my_car.name, "Toyota Corolla");
+    strcpy(my_car.color, "Silver");
+    set_price(&my_car, 22000);
+    my_car.mileage = 15000;
+    my_car.mpg = 32;
+    set_manufacture_date(&my_car, 15, 6, 2022);
+    set_engine(&my_car, 1.8, 4, "gasoline");
 
-    // Toyota Corolla (Valid case)
-    if (set_price(&toyota_corolla, 22000) &&
-        set_manufacture_date(&toyota_corolla, 15, 6, 2022) &&
-        set_engine(&toyota_corolla, 1.8, 4, "gasoline"))
-    {
-        print_car(&toyota_corolla);
-        inspect_car(&toyota_corolla);
-    }
+    printf("Car Details:\n");
+    print_car(&my_car);
+    inspect_car(&my_car);
 
-    // Tesla Model 3 (Electric car, high MPG)
-    if (set_price(&tesla_model_3, 45000) &&
-        set_manufacture_date(&tesla_model_3, 1, 3, 2023) &&
-        set_engine(&tesla_model_3, 0, 0, "electric"))
-    {
-        print_car(&tesla_model_3);
-        inspect_car(&tesla_model_3);
-    }
-
-    // Ford F-150 (Large engine, low MPG)
-    if (set_price(&ford_f150, 55000) &&
-        set_manufacture_date(&ford_f150, 10, 9, 2021) &&
-        set_engine(&ford_f150, 5.0, 8, "gasoline"))
-    {
-        print_car(&ford_f150);
-        inspect_car(&ford_f150);
-    }
-
-    // Honda Civic (Valid case, different year)
-    if (set_price(&honda_civic, 21000) &&
-        set_manufacture_date(&honda_civic, 5, 4, 2019) &&
-        set_engine(&honda_civic, 1.5, 4, "gasoline"))
-    {
-        print_car(&honda_civic);
-        inspect_car(&honda_civic);
-    }
-
-    // Chevrolet Bolt (Electric car, price at upper limit)
-    if (set_price(&chevrolet_bolt, 60000) &&
-        set_manufacture_date(&chevrolet_bolt, 20, 11, 2022) &&
-        set_engine(&chevrolet_bolt, 0, 0, "electric"))
-    {
-        print_car(&chevrolet_bolt);
-        inspect_car(&chevrolet_bolt);
-    }
-
-    // BMW X5 (Invalid price - too high)
-    if (set_price(&bmw_x5, 65000) &&
-        set_manufacture_date(&bmw_x5, 1, 1, 2023) &&
-        set_engine(&bmw_x5, 3.0, 6, "diesel"))
-    {
-        print_car(&bmw_x5);
-        inspect_car(&bmw_x5);
-    }
+    calculate_total_value(&my_car, 5);
+    calculate_annual_fuel_cost(&my_car, 5, 12000, 3.50, 0.03);
 
     return 0;
 }
 
-// Function implementations
-int set_price(struct Car *c, float price)
-{
+int set_price(struct Car *c, float price) {
+    if (price >= 5000 && price <= 60000) {
+        c->price = price;
+        return 1;
+    }
+    return 0;
+}
+
+int set_manufacture_date(struct Car *c, int day, int month, int year) {
+    if (year >= 1886 && year <= 2024 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+        c->manufacture_date.day = day;
+        c->manufacture_date.month = month;
+        c->manufacture_date.year = year;
+        return 1;
+    }
+    return 0;
+}
+
+int set_engine(struct Car *c, float displacement, int cylinders, char *fuel_type) {
+    if (displacement > 0 && displacement <= 10 && cylinders > 0 && cylinders <= 16) {
+        c->engine.displacement = displacement;
+        c->engine.cylinders = cylinders;
+        strcpy(c->engine.fuel_type, fuel_type);
+        return 1;
+    }
+    return 0;
+}
+
+void print_car(struct Car *c) {
+    printf("Name: %s\n", c->name);
+    printf("Color: %s\n", c->color);
+    printf("Price: $%.2f\n", c->price);
+    printf("Mileage: %d\n", c->mileage);
+    printf("MPG: %.1f\n", c->mpg);
+    printf("Manufacture Date: %d/%d/%d\n", c->manufacture_date.day, c->manufacture_date.month, c->manufacture_date.year);
+    printf("Engine: %.1fL, %d cylinders, %s\n", c->engine.displacement, c->engine.cylinders, c->engine.fuel_type);
+}
+
+void inspect_car(struct Car *c) {
+    if (c->price >= 5000 && c->price <= 60000 &&
+        c->mpg > 30 &&
+        c->manufacture_date.year > 2016 &&
+        c->engine.displacement < 2.0 &&
+        c->manufacture_date.year >= 2020) {
+        printf("Inspection Result: Pass\n");
+    } else {
+        printf("Inspection Result: Fail\n");
+    }
+}
+
+void calculate_total_value(struct Car *c, int num_years) {
     // TODO
 }
 
-int set_manufacture_date(struct Car *c, int day, int month, int year)
-{
-    // TODO
-}
-
-int set_engine(struct Car *c, float displacement, int cylinders, char *fuel_type)
-{
-    // TODO
-}
-
-void print_car(struct Car *c)
-{
-    // TODO
-}
-
-void inspect_car(struct Car *c)
-{
+void calculate_annual_fuel_cost(struct Car *c, int num_years, int annual_mileage, float initial_fuel_price, float annual_price_increase) {
     // TODO
 }
